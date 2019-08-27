@@ -12,7 +12,7 @@ set(CMAKE_C_STANDARD 11)
 include_directories(
 "include"
 )
-set(ALL_SRC_FILES 
+set(ALL_SRC_FILES
 "src/cblip.c"
 "src/varint.c"
 "src/ack_handler.c"
@@ -29,6 +29,8 @@ endif()
 add_library(CBlip SHARED ${ALL_SRC_FILES})
 if(WIN32 OR ANDROID)
     target_link_libraries(CBlip zlibstatic)
+else()
+    target_link_libraries(CBlip z)
 endif()
 
 add_executable(CBlipDriver "program/main.c")

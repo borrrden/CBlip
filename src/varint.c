@@ -17,7 +17,12 @@
 //
 
 #include "varint.h"
-#include <minmax.h>
+#ifndef MIN
+# define MIN(A,B) ((A)<(B)?(A):(B))
+#endif
+#ifndef MAX
+# define MAX(A,B) ((A)>(B)?(A):(B))
+#endif
 
 size_t SizeOfVarInt(uint64_t n) {
     size_t size = 1;
@@ -32,7 +37,7 @@ size_t _GetUVarInt(uint8_t* buf, size_t size, uint64_t *n) {
     // NOTE: The public inline function GetUVarInt already decodes 1-byte varints,
     // so if we get here we can assume the varint is at least 2 bytes.
     uint8_t* pos = buf;
-    uint8_t* end = pos + min(size, (size_t)kMaxVarintLen64);
+    uint8_t* end = pos + MIN(size, (size_t)kMaxVarintLen64);
     uint64_t result = *pos++ & 0x7F;
     int shift = 7;
     while (pos < end) {
