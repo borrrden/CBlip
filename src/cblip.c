@@ -65,6 +65,7 @@ blip_connection_t* blip_connection_new()
     }
 
     retVal->crc = 0;
+    retVal->crc_out = 0;
     return retVal;
 }
 

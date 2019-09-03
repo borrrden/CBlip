@@ -165,10 +165,11 @@ int handle_normal_msg(blip_message_t* msg, uint8_t* data, size_t size)
 }
 
 uint8_t* serialize_normal_msg(blip_message_t* msg, size_t* out_size) {
-    size_t prop_size = msg->properties ? strlen((const char*)msg->properties) + 1 : 0;
-    *out_size += SizeOfVarInt(prop_size) + prop_size + msg->body_size + 4;
-    uint8_t* writeBuf = (uint8_t*)malloc(*out_size);
-    uint8_t* pos = put_varint(msg->msg_no, writeBuf);
+    const size_t prop_size = msg->properties ? strlen((const char*)msg->properties) + 1 : 0;
+    const size_t payload_size = SizeOfVarInt(prop_size) + prop_size + msg->body_size ;
+    *out_size += payload_size + BLIP_BODY_CHECKSUM_SIZE;
+    uint8_t* write_buf = (uint8_t*)malloc(*out_size);
+    uint8_t* pos = put_varint(msg->msg_no, write_buf);
     uint8_t* payload = pos = put_varint(msg->flags | msg->type, pos);
     pos = put_varint(prop_size, pos);
     transform_properties(msg->properties, prop_size, true);
@@ -176,20 +177,27 @@ uint8_t* serialize_normal_msg(blip_message_t* msg, size_t* out_size) {
     pos += prop_size;
     memcpy(pos, msg->body, msg->body_size);
     pos += msg->body_size;
+
+    blip_connection_t* connection = (blip_connection_t*)msg->private[0];
+    connection->crc_out = crc32(connection->crc_out, payload, (uInt)payload_size);
+    msg->checksum = connection->crc_out;
+
     if(msg->flags & kCompressed) {
-        size_t finalSize;
-        uint8_t* compressed = compress_body((blip_connection_t *)msg->private[0], payload, pos - payload, &finalSize);
-        *out_size = payload - writeBuf + finalSize + 4;
-        uint8_t* finalWriteBuf = pos = (uint8_t*)malloc(*out_size);
-        memcpy(pos, writeBuf, payload - writeBuf);
-        pos += (payload - writeBuf);
-        memcpy(pos, compressed, finalSize);
-        pos += finalSize;
-        free(writeBuf);
-        writeBuf = finalWriteBuf;
+        size_t final_size;
+        uint8_t* compressed = compress_body((blip_connection_t *)msg->private[0], payload, pos - payload, &final_size);
+        *out_size = payload - write_buf + final_size + 4;
+        uint8_t* final_write_buf = pos = (uint8_t*)malloc(*out_size);
+        memcpy(pos, write_buf, payload - write_buf);
+        pos += (payload - write_buf);
+        memcpy(pos, compressed, final_size);
+        pos += final_size;
+        free(write_buf);
+        write_buf = final_write_buf;
     }
 
+    
+
     (*(int*)pos) = _encBig32(msg->checksum);
-    msg->private[2] = (uint64_t)writeBuf;
-    return writeBuf;
+    msg->private[2] = (uint64_t)write_buf;
+    return write_buf;
 }
