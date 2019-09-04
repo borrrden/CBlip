@@ -164,7 +164,7 @@ int handle_normal_msg(blip_message_t* msg, uint8_t* data, size_t size)
     return 0;
 }
 
-uint8_t* serialize_normal_msg(blip_message_t* msg, size_t* out_size) {
+uint8_t* serialize_normal_msg(blip_connection_t* connection, blip_message_t* msg, size_t* out_size) {
     const size_t prop_size = msg->properties ? strlen((const char*)msg->properties) + 1 : 0;
     const size_t payload_size = SizeOfVarInt(prop_size) + prop_size + msg->body_size ;
     *out_size += payload_size + BLIP_BODY_CHECKSUM_SIZE;
@@ -178,7 +178,6 @@ uint8_t* serialize_normal_msg(blip_message_t* msg, size_t* out_size) {
     memcpy(pos, msg->body, msg->body_size);
     pos += msg->body_size;
 
-    blip_connection_t* connection = (blip_connection_t*)msg->private[0];
     connection->crc_out = crc32(connection->crc_out, payload, (uInt)payload_size);
     msg->checksum = connection->crc_out;
 

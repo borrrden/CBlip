@@ -77,7 +77,11 @@ void blip_connection_free(blip_connection_t* connection)
     free(connection);
 }
 
-blip_message_t* blip_message_new(const blip_connection_t* connection, uint8_t* data, size_t size)
+blip_message_t* blip_message_new() {
+    return calloc(1, sizeof(blip_message_t));
+}
+
+blip_message_t* blip_message_read(const blip_connection_t* connection, uint8_t* data, size_t size)
 {
     blip_message_t* retVal = malloc(sizeof(blip_message_t));
     if (!retVal) {
@@ -139,12 +143,12 @@ uint64_t blip_get_message_ack_size(const blip_message_t* msg)
     return 0UL;
 }
 
-const uint8_t* blip_message_serialize(blip_message_t* msg, size_t* out_size) {
+const uint8_t* blip_message_serialize(blip_connection_t* connection, blip_message_t* msg, size_t* out_size) {
     *out_size = SizeOfVarInt(msg->msg_no);
     *out_size += SizeOfVarInt(msg->flags | msg->type);
     if(msg->type >= kAckRequestType) {
         return serialize_ack_msg(msg, out_size);
     }
 
-    return serialize_normal_msg(msg, out_size);
+    return serialize_normal_msg(connection, msg, out_size);
 }

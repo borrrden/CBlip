@@ -100,13 +100,19 @@ CBLIP_API void blip_connection_free(blip_connection_t* connection);
  *******************/
 
 /**
+ * Creates a new empty BLIP message object
+ * @return The created message object
+ */
+CBLIP_API blip_message_t* blip_message_new();
+
+/**
  * Creates a new BLIP message object
  * @param connection    The connection to derive the message from
  * @param data          The raw data received over the wire
  * @param size          The size of the received data
  * @return              The created message object
  */
-CBLIP_API blip_message_t* blip_message_new(const blip_connection_t* connection, uint8_t* data, size_t size);
+CBLIP_API blip_message_t* blip_message_read(const blip_connection_t* connection, uint8_t* data, size_t size);
 
 /**
  * Frees the memory associated with a BLIP message
@@ -131,8 +137,9 @@ CBLIP_API uint64_t blip_get_message_ack_size(const blip_message_t* msg);
 
 /**
  * Serializes a BLIP message into raw bytes for transport
- * @param msg         The message to serialize
- * @param out_size    On successful completion, contains the size of the returned bytes
- * @return            The encoded BLIP message as a pointer to byte data
+ * @param connection    The connection to use during serialization (CRC / GZIP)
+ * @param msg           The message to serialize
+ * @param out_size      On successful completion, contains the size of the returned bytes
+ * @return              The encoded BLIP message as a pointer to byte data
  */
-CBLIP_API const uint8_t* blip_message_serialize(blip_message_t* msg, size_t* out_size);
+CBLIP_API const uint8_t* blip_message_serialize(blip_connection_t* connection, blip_message_t* msg, size_t* out_size);

@@ -30,8 +30,9 @@ int handle_normal_msg(blip_message_t* msg, uint8_t* data, size_t size);
 
 /**
  * Serializes a non-ACK type BLIP message
- * @param msg       The message to serialize
- * @param out_size  Holds the size of the returned data on completion
- * @return          The serialized byte data of the message
+ * @param connection    The connection to use during serialization (CRC / GZIP)
+ * @param msg           The message to serialize
+ * @param out_size      Holds the size of the returned data on completion
+ * @return              The serialized byte data of the message
  */
-uint8_t* serialize_normal_msg(blip_message_t* msg, size_t* out_size);
+uint8_t* serialize_normal_msg(blip_connection_t* connection, blip_message_t* msg, size_t* out_size);
