@@ -19,7 +19,7 @@
 #include "msg_handler.h"
 #include "hashset.h"
 #include "types.h"
-#include "endian.h"
+#include "cblip_endian.h"
 #include <stdio.h>
 #include <string.h>
 #include <zlib.h>

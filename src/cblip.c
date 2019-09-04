@@ -24,8 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <zlib.h>
-#include <stdio.h>
-#include <endian.h>
 
 // Array mapping MessageType to a short mnemonic like "REQ".
 static const char* const kMessageTypeNames[] = {

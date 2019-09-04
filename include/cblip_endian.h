@@ -1,5 +1,5 @@
 //
-// endian.h
+// cblip_endian.h
 //
 // Copyright (c) 2015 Couchbase, Inc All rights reserved.
 //
